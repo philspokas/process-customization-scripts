@@ -17,48 +17,53 @@ param
 (
     [Parameter(Mandatory=$true,HelpMessage="CollectionURL is required. Usage Example: .\ExportProjectTemplatesFromCSV.ps1 https://myServer:8080/tfs/DefaultCollection")] [string] $CollectionURL,
     [Parameter(Mandatory=$true,HelpMessage="Project name is required. Usage Example: .\ExportProjectTemplate.ps1 http://myServer:8080/tfs/DefaultCollection myProject")] [string] $ProjectName,
-    [Parameter(Mandatory=$true,HelpMessage="Template path is required")] [string] $global:templatePath,
+#    [Parameter(Mandatory=$true,HelpMessage="Template path is required")] [string] $global:templatePath,
     [Parameter(Mandatory=$false, HelpMessage="Set to false if you only want to see what changes will be made")] [switch] $ValidateOnly = $false
 )
 
 $scriptFolder = Split-Path -Path $MyInvocation.MyCommand.Path
 
-$VSDirectories = @()
-$VSDirectories += "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Professional\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\TeamExplorer\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Professional\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\TeamExplorer\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 12.0\Common7\IDE"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 11.0\Common7\IDE"
-$VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 10.0\Common7\IDE"
+# expects alias or path configuration
+$WitAdminExe = "witadmin"
 
-$WitAdminExe = "witadmin.exe"
 
-if(-not (Get-Command $WitAdminExe -ErrorAction SilentlyContinue)) {
-  Write-Host -Verbose "Unable to find witadmin.exe on your path. Attempting VS install directories"
-  foreach($vsDir in $VSDirectories) {
-    $WitAdminExe = Join-Path $vsDir "witadmin.exe"
-    Write-Host -Verbose "Testing for $WitAdminExe"
-    if(Test-Path $WitAdminExe) {
-      break
-    }
-  }
-}
+# $VSDirectories = @()
+# $VSDirectories += "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Professional\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\TeamExplorer\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Professional\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\TeamExplorer\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0\Common7\IDE"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 12.0\Common7\IDE"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 11.0\Common7\IDE"
+# $VSDirectories += "${env:ProgramFiles(x86)}\Microsoft Visual Studio 10.0\Common7\IDE"
 
-if(-not (Test-Path $WitAdminExe)) {
-  throw "Unable to find the witadmin.exe in your path or in any VS install."
-}
+# $WitAdminExe = "witadmin.exe"
 
-# Format witadmin exe with quotes for the invoke-expression to like
-$WitAdminExe = "'$WitAdminExe'"
+
+# if(-not (Get-Command $WitAdminExe -ErrorAction SilentlyContinue)) {
+#   Write-Host -Verbose "Unable to find witadmin.exe on your path. Attempting VS install directories"
+#   foreach($vsDir in $VSDirectories) {
+#     $WitAdminExe = Join-Path $vsDir "witadmin.exe"
+#     Write-Host -Verbose "Testing for $WitAdminExe"
+#     if(Test-Path $WitAdminExe) {
+#       break
+#     }
+#   }
+# }
+
+# if(-not (Test-Path $WitAdminExe)) {
+#   throw "Unable to find the witadmin.exe in your path or in any VS install."
+# }
+
+# # Format witadmin exe with quotes for the invoke-expression to like
+# $WitAdminExe = "'$WitAdminExe'"
 
 function ValidateTemplate() {
 	##TODO: Call the validator on the template and if there are no errors, Move forward...
@@ -146,6 +151,7 @@ function ValidateWorkItems()
 	}
 }
 
+Write-Host ">>> Conform project $ProjectName >>>"
 Write-Host "Step 1: Preparing Conform" -ForegroundColor Yellow
 ValidateTemplate
 Write-Host "Step 1: Complete" -ForegroundColor Green
